@@ -43,6 +43,7 @@
 		A2000029000000000000001 /* DeveloperToolsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000030000000000000001 /* DeveloperToolsSheet.swift */; };
 		A2000031000000000000001 /* LevelCompleteOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000032000000000000001 /* LevelCompleteOverlay.swift */; };
 		A2000033000000000000001 /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034000000000000001 /* ConfettiView.swift */; };
+		A2000040000000000000001 /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000041000000000000001 /* SettingsSheet.swift */; };
 		F0276CD92F24371E00DFDF92 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F0276CD82F24371E00DFDF92 /* GoogleMobileAds */; };
 /* End PBXBuildFile section */
 
@@ -96,6 +97,7 @@
 		A2000030000000000000001 /* DeveloperToolsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeveloperToolsSheet.swift; sourceTree = "<group>"; };
 		A2000032000000000000001 /* LevelCompleteOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelCompleteOverlay.swift; sourceTree = "<group>"; };
 		A2000034000000000000001 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
+		A2000041000000000000001 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -238,6 +240,7 @@
 				A2000028000000000000001 /* BonusWordsSheet.swift */,
 				A2000030000000000000001 /* DeveloperToolsSheet.swift */,
 				A2000032000000000000001 /* LevelCompleteOverlay.swift */,
+				A2000041000000000000001 /* SettingsSheet.swift */,
 			);
 			path = Sheets;
 			sourceTree = "<group>";
@@ -383,6 +386,7 @@
 				A2000029000000000000001 /* DeveloperToolsSheet.swift in Sources */,
 				A2000031000000000000001 /* LevelCompleteOverlay.swift in Sources */,
 				A2000033000000000000001 /* ConfettiView.swift in Sources */,
+				A2000040000000000000001 /* SettingsSheet.swift in Sources */,
 				A1000017000000000000001 /* PersistenceManager.swift in Sources */,
 				A1000070000000000000001 /* SoundManager.swift in Sources */,
 				A1000140000000000000001 /* AdManager.swift in Sources */,

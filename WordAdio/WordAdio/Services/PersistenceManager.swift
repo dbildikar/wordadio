@@ -50,8 +50,10 @@ class PersistenceManager {
     ) {
         var progress = loadProgress()
 
-        // Coins are already added in GameViewModel.completeLevel()
-        // Just track statistics here
+        // Add coins earned this level to total
+        progress.coins += coinsEarned
+        
+        // Track statistics
         progress.totalBonusWords += bonusWords
         progress.completedLevels.insert(levelNumber)
 

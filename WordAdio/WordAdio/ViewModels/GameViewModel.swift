@@ -294,9 +294,8 @@ class GameViewModel: ObservableObject {
             streak: progress.consecutiveCompletedLevels + 1  // +1 for this level
         )
         
-        // Add all coins to player's total
+        // Total coins earned (added to progress in recordLevelCompletion)
         let totalCoinsEarned = gameState.coinsEarnedThisLevel + completionBonus
-        progress.coins += totalCoinsEarned
 
         // Play level complete sound and haptic
         soundManager.playLevelCompleteSound()
@@ -385,8 +384,9 @@ class GameViewModel: ObservableObject {
 
     /// Use a hint to reveal one letter (costs coins)
     func useHint() {
-        // Check if player has enough coins
-        guard progress.coins >= CoinRules.hintCost else {
+        // Check if player has enough coins (bank + current level earnings)
+        let totalAvailableCoins = progress.coins + gameState.coinsEarnedThisLevel
+        guard totalAvailableCoins >= CoinRules.hintCost else {
             soundManager.playErrorSound()
             haptics.error()
             showMessage("Need \(CoinRules.hintCost) coins for hint!", type: .error)
@@ -400,8 +400,14 @@ class GameViewModel: ObservableObject {
             // Find first empty position in this word
             for letterIndex in 0..<slot.word.count {
                 if slot.filledLetters[letterIndex] == nil {
-                    // Deduct coins
-                    progress.coins -= CoinRules.hintCost
+                    // Deduct coins - first from current level earnings, then from bank
+                    if gameState.coinsEarnedThisLevel >= CoinRules.hintCost {
+                        gameState.coinsEarnedThisLevel -= CoinRules.hintCost
+                    } else {
+                        let remainingCost = CoinRules.hintCost - gameState.coinsEarnedThisLevel
+                        gameState.coinsEarnedThisLevel = 0
+                        progress.coins -= remainingCost
+                    }
                     persistence.saveProgress(progress)
                     
                     // Fill this one letter and propagate to intersecting slots

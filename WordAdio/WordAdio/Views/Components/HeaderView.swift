@@ -1,8 +1,9 @@
 import SwiftUI
 
-/// Header view displaying level and coins with animated updates
+/// Header view displaying level, coins, and settings menu
 struct HeaderView: View {
     @ObservedObject var viewModel: GameViewModel
+    @Binding var showSettings: Bool
     
     // Animation state for coin counter
     @State private var displayedCoins: Int = 0
@@ -17,6 +18,19 @@ struct HeaderView: View {
 
     var body: some View {
         HStack {
+            // Settings menu button
+            Button(action: { showSettings = true }) {
+                Image(systemName: "line.3.horizontal")
+                    .font(.title3)
+                    .foregroundColor(.primary)
+                    .frame(width: 36, height: 36)
+                    .background(
+                        Circle()
+                            .fill(.ultraThinMaterial)
+                            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
+                    )
+            }
+            
             // Level indicator
             HStack(spacing: 6) {
                 Image(systemName: "flag.fill")
@@ -124,7 +138,7 @@ struct HeaderView: View {
 }
 
 #Preview {
-    HeaderView(viewModel: GameViewModel())
+    HeaderView(viewModel: GameViewModel(), showSettings: .constant(false))
         .padding()
         .background(Color.gray.opacity(0.2))
 }

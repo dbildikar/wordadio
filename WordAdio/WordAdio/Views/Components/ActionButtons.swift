@@ -1,9 +1,8 @@
 import SwiftUI
 
-/// Vertical stack of action buttons (shuffle, bonus, mute, hint)
+/// Vertical stack of action buttons (shuffle, bonus, hint)
 struct ActionButtons: View {
     @ObservedObject var viewModel: GameViewModel
-    @Binding var isMusicMuted: Bool
     let onShowBonusWords: () -> Void
     
     private var buttonSize: CGFloat {
@@ -43,19 +42,7 @@ struct ActionButtons: View {
                 .shadow(color: .orange.opacity(0.3), radius: 4, y: 2)
             }
             
-            // Music mute button
-            ActionButton(
-                icon: isMusicMuted ? "speaker.slash.fill" : "speaker.wave.2.fill",
-                iconColor: .white,
-                gradient: AppColors.muteButtonGradient,
-                shadowColor: .gray.opacity(0.3),
-                size: buttonSize
-            ) {
-                isMusicMuted.toggle()
-                SoundManager.shared.isMuted = isMusicMuted
-            }
-            
-            // Hint button (last)
+            // Hint button
             ActionButton(
                 icon: "lightbulb.fill",
                 iconColor: .yellow,
@@ -93,7 +80,6 @@ struct ActionButton: View {
 #Preview {
     ActionButtons(
         viewModel: GameViewModel(),
-        isMusicMuted: .constant(false),
         onShowBonusWords: {}
     )
     .padding()

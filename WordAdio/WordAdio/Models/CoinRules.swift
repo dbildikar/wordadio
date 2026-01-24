@@ -5,18 +5,18 @@ import Foundation
 /// Rules for earning and spending coins in the game
 enum CoinRules {
     // Starting coins for new players
-    static let startingCoins = 50
+    static let startingCoins = 25
     
     // Earning coins
     static let coinsPerLetter = 1                    // 1 coin per letter in puzzle words
-    static let bonusWordMultiplier = 2               // 2x coins for bonus words
-    static let levelCompletionBonus = 25             // +25 for completing level
-    static let noHintsBonus = 15                     // +15 if no hints used
-    static let sixLetterWordBonus = 10               // +10 bonus for 6-letter words
-    static let streakBonusPerLevel = 5               // +5 per streak level
+    static let bonusWordMultiplier = 1               // 1x coins for bonus words (same as regular)
+    static let levelCompletionBonus = 10             // +10 for completing level
+    static let noHintsBonus = 5                      // +5 if no hints used
+    static let sixLetterWordBonus = 3                // +3 bonus for 6-letter words
+    static let streakBonusPerLevel = 2               // +2 per streak level
     
     // Spending coins
-    static let hintCost = 10                         // 10 coins per hint
+    static let hintCost = 15                         // 15 coins per hint
     
     /// Calculate coins earned for finding a word
     static func coins(for word: String, isBonus: Bool) -> Int {

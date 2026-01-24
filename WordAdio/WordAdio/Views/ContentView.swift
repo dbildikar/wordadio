@@ -5,7 +5,7 @@ struct ContentView: View {
     @StateObject private var viewModel = GameViewModel()
     @State private var showDeveloperTools = false
     @State private var showBonusWords = false
-    @State private var isMusicMuted = SoundManager.shared.isMuted
+    @State private var showSettings = false
     @State private var showWordDefinition = false
     @State private var selectedWord: String = ""
     @State private var wordDefinition: WordDefinition?
@@ -14,7 +14,7 @@ struct ContentView: View {
     var body: some View {
         VStack(spacing: LayoutMetrics.sectionSpacing) {
             // Header (5 taps to access developer tools)
-            HeaderView(viewModel: viewModel)
+            HeaderView(viewModel: viewModel, showSettings: $showSettings)
                 .padding(.horizontal, LayoutMetrics.horizontalPadding)
                 .padding(.top, 4)
                 .onTapGesture(count: 5) {
@@ -25,7 +25,6 @@ struct ContentView: View {
             HStack(alignment: .top, spacing: 8) {
                 ActionButtons(
                     viewModel: viewModel,
-                    isMusicMuted: $isMusicMuted,
                     onShowBonusWords: { showBonusWords = true }
                 )
                 PuzzleBoardView(viewModel: viewModel)
@@ -64,6 +63,9 @@ struct ContentView: View {
         }
         .sheet(isPresented: $showBonusWords) {
             BonusWordsSheetView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsSheet()
         }
         .sheet(isPresented: $showWordDefinition) {
             WordDefinitionSheet(

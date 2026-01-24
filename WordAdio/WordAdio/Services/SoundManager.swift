@@ -12,15 +12,10 @@ class SoundManager {
     
     // Background music
     private var backgroundMusicPlayer: AVAudioPlayer?
-    var isMuted: Bool = false {
-        didSet {
-            backgroundMusicPlayer?.volume = isMuted ? 0 : 0.3
-            UserDefaults.standard.set(isMuted, forKey: "musicMuted")
-        }
-    }
+    private(set) var isMusicMuted: Bool = false
     
-    // Track if sound effects are muted (separate from music)
-    var soundEffectsMuted: Bool = false
+    // Sound effects / tones
+    private(set) var areTonesEnabled: Bool = true
 
     // Musical notes for letter selection (E major scale - matches background music)
     private let noteFrequencies: [Float] = [
@@ -42,14 +37,28 @@ class SoundManager {
     ]
 
     private init() {
-        // Load mute preference
-        isMuted = UserDefaults.standard.bool(forKey: "musicMuted")
+        // Load preferences
+        isMusicMuted = UserDefaults.standard.bool(forKey: "musicMuted")
+        areTonesEnabled = UserDefaults.standard.object(forKey: "tonesEnabled") as? Bool ?? true
         
         // Setup audio on background thread to not block UI
         DispatchQueue.global(qos: .utility).async { [weak self] in
             self?.setupAudioEngine()
             self?.setupBackgroundMusic()
         }
+    }
+    
+    /// Enable or disable background music
+    func setMusicEnabled(_ enabled: Bool) {
+        isMusicMuted = !enabled
+        backgroundMusicPlayer?.volume = enabled ? 0.3 : 0
+        UserDefaults.standard.set(!enabled, forKey: "musicMuted")
+    }
+    
+    /// Enable or disable sound effect tones
+    func setTonesEnabled(_ enabled: Bool) {
+        areTonesEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "tonesEnabled")
     }
 
     private func setupAudioEngine() {
@@ -83,7 +92,7 @@ class SoundManager {
             
             backgroundMusicPlayer = try AVAudioPlayer(contentsOf: url)
             backgroundMusicPlayer?.numberOfLoops = -1 // Loop forever
-            backgroundMusicPlayer?.volume = isMuted ? 0 : 0.3
+            backgroundMusicPlayer?.volume = isMusicMuted ? 0 : 0.3
             backgroundMusicPlayer?.prepareToPlay()
         } catch {
             // Background music failed to setup - app will work without music
@@ -100,11 +109,6 @@ class SoundManager {
     /// Stop background music
     func stopBackgroundMusic() {
         backgroundMusicPlayer?.stop()
-    }
-    
-    /// Toggle mute state
-    func toggleMute() {
-        isMuted.toggle()
     }
 
     /// Play a tone when a letter is selected (ascending musical scale)
@@ -221,6 +225,8 @@ class SoundManager {
 
     /// Play a simple tone at a given frequency (on background thread to not block UI)
     private func playTone(frequency: Float, duration: TimeInterval, volume: Float) {
+        guard areTonesEnabled else { return }
+        
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self = self,
                   let engine = self.audioEngine,

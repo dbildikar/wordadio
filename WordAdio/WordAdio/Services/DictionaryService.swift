@@ -265,13 +265,13 @@ class DictionaryService {
             guard !fallbackWords.isEmpty else {
                 return "SPRING"
             }
-            var generator = SeededRandomGenerator(seed: seed)
+            var generator = SeededRandomGenerator(seed: spreadSeed(seed))
             let index = Int.random(in: 0..<fallbackWords.count, using: &generator)
             return fallbackWords[index]
         }
 
-        // Use seed for deterministic selection
-        var generator = SeededRandomGenerator(seed: seed)
+        // Use a spread seed to ensure better distribution across the word list
+        var generator = SeededRandomGenerator(seed: spreadSeed(seed))
         let index = Int.random(in: 0..<validSixLetterWords.count, using: &generator)
         let selectedWord = validSixLetterWords[index]
         
@@ -281,6 +281,18 @@ class DictionaryService {
         }
         
         return selectedWord
+    }
+    
+    /// Spread a small seed value to a larger range for better distribution
+    private func spreadSeed(_ seed: UInt64) -> UInt64 {
+        // Use a simple hash-like spreading to distribute small values across a larger range
+        var h = seed
+        h ^= h >> 33
+        h = h &* 0xff51afd7ed558ccd
+        h ^= h >> 33
+        h = h &* 0xc4ceb9fe1a85ec53
+        h ^= h >> 33
+        return h
     }
 }
 
