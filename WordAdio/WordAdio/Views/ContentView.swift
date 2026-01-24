@@ -1,0 +1,133 @@
+import SwiftUI
+
+/// Main game view containing all UI elements
+struct ContentView: View {
+    @StateObject private var viewModel = GameViewModel()
+    @State private var showDeveloperTools = false
+    @State private var showBonusWords = false
+    @State private var isMusicMuted = SoundManager.shared.isMuted
+    @State private var showWordDefinition = false
+    @State private var selectedWord: String = ""
+    @State private var wordDefinition: WordDefinition?
+    @State private var isLoadingDefinition = false
+    
+    var body: some View {
+        VStack(spacing: LayoutMetrics.sectionSpacing) {
+            // Header (5 taps to access developer tools)
+            HeaderView(viewModel: viewModel)
+                .padding(.horizontal, LayoutMetrics.horizontalPadding)
+                .padding(.top, 4)
+                .onTapGesture(count: 5) {
+                    showDeveloperTools = true
+                }
+            
+            // Middle section: buttons + puzzle
+            HStack(alignment: .top, spacing: 8) {
+                ActionButtons(
+                    viewModel: viewModel,
+                    isMusicMuted: $isMusicMuted,
+                    onShowBonusWords: { showBonusWords = true }
+                )
+                PuzzleBoardView(viewModel: viewModel)
+                    .frame(maxWidth: .infinity)
+            }
+            .padding(.horizontal, 12)
+            
+            // Wheel - constrained height
+            LetterWheelView(viewModel: viewModel)
+                .frame(maxHeight: LayoutMetrics.wheelMaxHeight)
+                .padding(.horizontal, 8)
+            
+            Spacer(minLength: 0)
+            
+            // Ad Banner at bottom
+            AdBannerContainer()
+        }
+        .background(
+            Image("Background")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .ignoresSafeArea()
+        )
+        .overlay { messageOverlay }
+        .overlay { levelCompleteOverlay }
+        .overlay { confettiOverlay }
+        .onChange(of: viewModel.showConfetti) { _, newValue in
+            if newValue {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    viewModel.showConfetti = false
+                }
+            }
+        }
+        .sheet(isPresented: $showDeveloperTools) {
+            DeveloperToolsView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showBonusWords) {
+            BonusWordsSheetView(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showWordDefinition) {
+            WordDefinitionSheet(
+                word: selectedWord,
+                definition: wordDefinition,
+                isLoading: isLoadingDefinition
+            )
+        }
+        .onAppear {
+            SoundManager.shared.startBackgroundMusic()
+            ATTManager.shared.requestTrackingPermission()
+        }
+        .environment(\.onWordTapped, { word in
+            selectedWord = word
+            isLoadingDefinition = true
+            showWordDefinition = true
+            Task {
+                wordDefinition = await DictionaryAPI.shared.getDefinition(for: word)
+                isLoadingDefinition = false
+            }
+        })
+    }
+    
+    // MARK: - Overlay Views
+    
+    @ViewBuilder
+    private var messageOverlay: some View {
+        if viewModel.showingMessage {
+            MessageOverlay(message: viewModel.message, type: viewModel.messageType)
+                .transition(.move(edge: .top).combined(with: .opacity))
+                .animation(.spring(), value: viewModel.showingMessage)
+        }
+    }
+    
+    @ViewBuilder
+    private var levelCompleteOverlay: some View {
+        if viewModel.showingLevelComplete, let stats = viewModel.levelCompleteStats {
+            LevelCompleteView(stats: stats) {
+                viewModel.continueToNextLevel()
+            }
+            .transition(.opacity.combined(with: .scale))
+            .animation(AnimationSprings.gentle, value: viewModel.showingLevelComplete)
+        }
+    }
+    
+    @ViewBuilder
+    private var confettiOverlay: some View {
+        ConfettiView(trigger: viewModel.showConfetti)
+    }
+}
+
+// MARK: - Word Tap Environment Key
+
+private struct WordTapKey: EnvironmentKey {
+    static let defaultValue: (String) -> Void = { _ in }
+}
+
+extension EnvironmentValues {
+    var onWordTapped: (String) -> Void {
+        get { self[WordTapKey.self] }
+        set { self[WordTapKey.self] = newValue }
+    }
+}
+
+#Preview {
+    ContentView()
+}
