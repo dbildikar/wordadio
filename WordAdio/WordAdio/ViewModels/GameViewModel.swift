@@ -21,6 +21,12 @@ class GameViewModel: ObservableObject {
     @Published var developerSettings = DeveloperSettings()
     @Published var hintsUsedThisLevel: Int = 0
     
+    // Hint timer - free hint after 1 minute of being stuck
+    @Published var freeHintAvailable: Bool = false
+    @Published var secondsUntilFreeHint: Int = 60
+    private var hintTimer: Timer?
+    private var lastActivityTime: Date = Date()
+    
     // Animation triggers
     @Published var showShuffleAnimation: Bool = false
     @Published var showInvalidShake: Bool = false
@@ -115,6 +121,13 @@ class GameViewModel: ObservableObject {
             self.gameState = GameState(puzzle: initialPuzzle)
         }
         self.wheelLetters = initialPuzzle.wheelLetters.map { WheelLetter(character: $0) }
+        
+        // Start hint timer
+        startHintTimer()
+    }
+    
+    deinit {
+        hintTimer?.invalidate()
     }
     
     /// Create a minimal fallback puzzle when generation fails
@@ -134,6 +147,41 @@ class GameViewModel: ObservableObject {
             wheelLetters: Array("SPRING"),
             gridSize: Puzzle.GridSize(rows: 6, cols: 6)
         )
+    }
+    
+    // MARK: - Hint Timer
+    
+    private func startHintTimer() {
+        lastActivityTime = Date()
+        freeHintAvailable = false
+        secondsUntilFreeHint = Int(CoinRules.hintUnlockSeconds)
+        
+        hintTimer?.invalidate()
+        hintTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.updateHintTimer()
+            }
+        }
+    }
+    
+    private func updateHintTimer() {
+        let elapsed = Date().timeIntervalSince(lastActivityTime)
+        let remaining = CoinRules.hintUnlockSeconds - elapsed
+        
+        if remaining <= 0 {
+            freeHintAvailable = true
+            secondsUntilFreeHint = 0
+        } else {
+            freeHintAvailable = false
+            secondsUntilFreeHint = Int(remaining)
+        }
+    }
+    
+    /// Reset the hint timer (called when user finds a word)
+    private func resetHintTimer() {
+        lastActivityTime = Date()
+        freeHintAvailable = false
+        secondsUntilFreeHint = Int(CoinRules.hintUnlockSeconds)
     }
 
     // MARK: - Game Actions
@@ -175,21 +223,27 @@ class GameViewModel: ObservableObject {
         // Check if it's a puzzle word
         if let filledPositions = gameState.fillWordAndGetPositions(word) {
             soundManager.playSuccessSound()
-            soundManager.playPointsSound()
             haptics.success()
             
+            // Only 6-letter words earn coins
             let coins = CoinRules.coins(for: word, isBonus: false)
-            gameState.coinsEarnedThisLevel += coins
+            if coins > 0 {
+                soundManager.playPointsSound()
+                gameState.coinsEarnedThisLevel += coins
+                triggerCoinsAnimation(coins: coins, color: .yellow)
+            }
             
             // Trigger animations
             lastFilledPositions = filledPositions
-            triggerCoinsAnimation(coins: coins, color: .yellow)
             
             // Trigger confetti for 6-letter words!
             if word.count == 6 {
                 soundManager.playConfettiSound()
                 showConfetti = true
             }
+            
+            // Reset hint timer on activity
+            resetHintTimer()
             
             // Save progress
             saveCurrentLevelState()
@@ -202,16 +256,22 @@ class GameViewModel: ObservableObject {
         } else {
             // It's a bonus word
             soundManager.playBonusWordSound()
-            soundManager.playPointsSound()
             haptics.success()
             
             gameState.bonusWords.insert(word)
-            let coins = CoinRules.coins(for: word, isBonus: true)
-            gameState.coinsEarnedThisLevel += coins
             
-            // Trigger animations
-            triggerCoinsAnimation(coins: coins, color: .orange)
+            // Only 6-letter bonus words earn coins
+            let coins = CoinRules.coins(for: word, isBonus: true)
+            if coins > 0 {
+                soundManager.playPointsSound()
+                gameState.coinsEarnedThisLevel += coins
+                triggerCoinsAnimation(coins: coins, color: .orange)
+            }
+            
             showMessage("Bonus!", type: .success)
+            
+            // Reset hint timer on activity
+            resetHintTimer()
             
             // Save progress
             saveCurrentLevelState()
@@ -288,11 +348,8 @@ class GameViewModel: ObservableObject {
         let allWords = gameState.foundWords.union(gameState.bonusWords)
         let longestWord = allWords.max(by: { $0.count < $1.count }) ?? ""
 
-        // Calculate completion bonus (includes no-hints bonus and streak bonus)
-        let completionBonus = CoinRules.completionBonus(
-            hintsUsed: hintsUsedThisLevel,
-            streak: progress.consecutiveCompletedLevels + 1  // +1 for this level
-        )
+        // Calculate completion bonus
+        let completionBonus = CoinRules.completionBonus(hintsUsed: hintsUsedThisLevel)
         
         // Total coins earned (added to progress in recordLevelCompletion)
         let totalCoinsEarned = gameState.coinsEarnedThisLevel + completionBonus
@@ -300,6 +357,9 @@ class GameViewModel: ObservableObject {
         // Play level complete sound and haptic
         soundManager.playLevelCompleteSound()
         haptics.heavyTap()
+        
+        // Stop hint timer
+        hintTimer?.invalidate()
         
         // Refresh the ad
         adManager.refreshAd()
@@ -340,6 +400,9 @@ class GameViewModel: ObservableObject {
         levelCompleteStats = nil
         hintsUsedThisLevel = 0
         loadNextLevel()
+        
+        // Restart hint timer for new level
+        startHintTimer()
     }
 
     /// Load the next level
@@ -376,20 +439,22 @@ class GameViewModel: ObservableObject {
             progress.clearCurrentLevelState()
             persistence.saveProgress(progress)
             
+            // Restart hint timer
+            startHintTimer()
+            
             showMessage("Level reset", type: .info)
         } else {
             showMessage("Failed to reset puzzle", type: .error)
         }
     }
 
-    /// Use a hint to reveal one letter (costs coins)
+    /// Use a hint to reveal one letter (FREE after waiting 1 minute)
     func useHint() {
-        // Check if player has enough coins (bank + current level earnings)
-        let totalAvailableCoins = progress.coins + gameState.coinsEarnedThisLevel
-        guard totalAvailableCoins >= CoinRules.hintCost else {
+        // Check if free hint is available
+        guard freeHintAvailable else {
             soundManager.playErrorSound()
             haptics.error()
-            showMessage("Need \(CoinRules.hintCost) coins for hint!", type: .error)
+            showMessage("Hint available in \(secondsUntilFreeHint)s", type: .error)
             return
         }
         
@@ -400,16 +465,6 @@ class GameViewModel: ObservableObject {
             // Find first empty position in this word
             for letterIndex in 0..<slot.word.count {
                 if slot.filledLetters[letterIndex] == nil {
-                    // Deduct coins - first from current level earnings, then from bank
-                    if gameState.coinsEarnedThisLevel >= CoinRules.hintCost {
-                        gameState.coinsEarnedThisLevel -= CoinRules.hintCost
-                    } else {
-                        let remainingCost = CoinRules.hintCost - gameState.coinsEarnedThisLevel
-                        gameState.coinsEarnedThisLevel = 0
-                        progress.coins -= remainingCost
-                    }
-                    persistence.saveProgress(progress)
-                    
                     // Fill this one letter and propagate to intersecting slots
                     let charIndex = slot.word.index(slot.word.startIndex, offsetBy: letterIndex)
                     let character = slot.word[charIndex]
@@ -427,6 +482,9 @@ class GameViewModel: ObservableObject {
                     
                     // Track hint usage
                     hintsUsedThisLevel += 1
+                    
+                    // Reset hint timer (user must wait another minute for next free hint)
+                    resetHintTimer()
                     
                     // Save progress after hint
                     saveCurrentLevelState()
