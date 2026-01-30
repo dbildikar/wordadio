@@ -2,7 +2,7 @@ import Foundation
 
 // MARK: - Coin Economy
 
-/// Rules for earning coins in the game
+/// Rules for earning and spending coins in the game
 enum CoinRules {
     // Starting coins for new players
     static let startingCoins = 25
@@ -12,8 +12,9 @@ enum CoinRules {
     static let levelCompletionBonus = 5              // +5 for completing level
     static let noHintsBonus = 3                      // +3 if no hints used
     
-    // Hints are now FREE but time-gated (1 minute)
-    static let hintUnlockSeconds: TimeInterval = 60  // 1 minute to unlock a free hint
+    // Hint costs
+    static let hintCost = 15                         // 15 coins for instant hint
+    static let freeHintWaitSeconds: TimeInterval = 60  // 1 minute wait for free hint (when no coins)
     
     /// Calculate coins earned for finding a word
     /// Only 6-letter words earn coins now

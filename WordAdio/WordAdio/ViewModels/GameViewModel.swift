@@ -21,11 +21,21 @@ class GameViewModel: ObservableObject {
     @Published var developerSettings = DeveloperSettings()
     @Published var hintsUsedThisLevel: Int = 0
     
-    // Hint timer - free hint after 1 minute of being stuck
+    // Hint system - pay with coins OR wait for free hint
     @Published var freeHintAvailable: Bool = false
     @Published var secondsUntilFreeHint: Int = 60
     private var hintTimer: Timer?
     private var lastActivityTime: Date = Date()
+    
+    /// Total coins available (bank + current level earnings)
+    var totalAvailableCoins: Int {
+        progress.coins + gameState.coinsEarnedThisLevel
+    }
+    
+    /// Whether user can afford a paid hint
+    var canAffordHint: Bool {
+        totalAvailableCoins >= CoinRules.hintCost
+    }
     
     // Animation triggers
     @Published var showShuffleAnimation: Bool = false
@@ -154,7 +164,7 @@ class GameViewModel: ObservableObject {
     private func startHintTimer() {
         lastActivityTime = Date()
         freeHintAvailable = false
-        secondsUntilFreeHint = Int(CoinRules.hintUnlockSeconds)
+        secondsUntilFreeHint = Int(CoinRules.freeHintWaitSeconds)
         
         hintTimer?.invalidate()
         hintTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -166,7 +176,7 @@ class GameViewModel: ObservableObject {
     
     private func updateHintTimer() {
         let elapsed = Date().timeIntervalSince(lastActivityTime)
-        let remaining = CoinRules.hintUnlockSeconds - elapsed
+        let remaining = CoinRules.freeHintWaitSeconds - elapsed
         
         if remaining <= 0 {
             freeHintAvailable = true
@@ -181,7 +191,7 @@ class GameViewModel: ObservableObject {
     private func resetHintTimer() {
         lastActivityTime = Date()
         freeHintAvailable = false
-        secondsUntilFreeHint = Int(CoinRules.hintUnlockSeconds)
+        secondsUntilFreeHint = Int(CoinRules.freeHintWaitSeconds)
     }
 
     // MARK: - Game Actions
@@ -448,13 +458,17 @@ class GameViewModel: ObservableObject {
         }
     }
 
-    /// Use a hint to reveal one letter (FREE after waiting 1 minute)
+    /// Use a hint to reveal one letter
+    /// - If user has coins: pay coins for instant hint
+    /// - If user has no coins: must wait for free hint timer
     func useHint() {
-        // Check if free hint is available
-        guard freeHintAvailable else {
+        let usingPaidHint = canAffordHint
+        
+        // If no coins, check if free hint is available
+        if !usingPaidHint && !freeHintAvailable {
             soundManager.playErrorSound()
             haptics.error()
-            showMessage("Hint available in \(secondsUntilFreeHint)s", type: .error)
+            showMessage("Hint in \(secondsUntilFreeHint)s (or \(CoinRules.hintCost) coins)", type: .error)
             return
         }
         
@@ -465,6 +479,18 @@ class GameViewModel: ObservableObject {
             // Find first empty position in this word
             for letterIndex in 0..<slot.word.count {
                 if slot.filledLetters[letterIndex] == nil {
+                    // Deduct coins if using paid hint
+                    if usingPaidHint {
+                        if gameState.coinsEarnedThisLevel >= CoinRules.hintCost {
+                            gameState.coinsEarnedThisLevel -= CoinRules.hintCost
+                        } else {
+                            let remainingCost = CoinRules.hintCost - gameState.coinsEarnedThisLevel
+                            gameState.coinsEarnedThisLevel = 0
+                            progress.coins -= remainingCost
+                        }
+                        persistence.saveProgress(progress)
+                    }
+                    
                     // Fill this one letter and propagate to intersecting slots
                     let charIndex = slot.word.index(slot.word.startIndex, offsetBy: letterIndex)
                     let character = slot.word[charIndex]
