@@ -2,10 +2,14 @@ import SwiftUI
 import GoogleMobileAds
 import AppTrackingTransparency
 import StoreKit
+import Firebase
 
 @main
 struct WordAdioApp: App {
     init() {
+        // Initialize Firebase
+        FirebaseApp.configure()
+        
         // Initialize Google Mobile Ads SDK
         MobileAds.shared.start()
     }

@@ -17,6 +17,7 @@ struct SettingsSheet: View {
                     }
                     .onChange(of: musicEnabled) { _, newValue in
                         SoundManager.shared.setMusicEnabled(newValue)
+                        AnalyticsManager.shared.logMusicToggled(enabled: newValue)
                     }
                     
                     Toggle(isOn: $tonesEnabled) {
@@ -24,6 +25,7 @@ struct SettingsSheet: View {
                     }
                     .onChange(of: tonesEnabled) { _, newValue in
                         SoundManager.shared.setTonesEnabled(newValue)
+                        AnalyticsManager.shared.logSoundEffectsToggled(enabled: newValue)
                     }
                     
                     Toggle(isOn: $hapticsEnabled) {
@@ -31,6 +33,7 @@ struct SettingsSheet: View {
                     }
                     .onChange(of: hapticsEnabled) { _, newValue in
                         HapticManager.shared.setEnabled(newValue)
+                        AnalyticsManager.shared.logHapticsToggled(enabled: newValue)
                     }
                 } header: {
                     Text("Sound & Feedback")
@@ -75,6 +78,9 @@ struct SettingsSheet: View {
             musicEnabled = !SoundManager.shared.isMusicMuted
             tonesEnabled = SoundManager.shared.areTonesEnabled
             hapticsEnabled = HapticManager.shared.isEnabled
+            
+            // Track settings opened
+            AnalyticsManager.shared.logSettingsOpened()
         }
     }
 }

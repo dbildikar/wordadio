@@ -71,6 +71,7 @@ class GameViewModel: ObservableObject {
 
     private let dictionary = DictionaryService.shared
     private let levelGenerator: LevelGenerator
+    private let analytics = AnalyticsManager.shared
     private let persistence = PersistenceManager.shared
     private let soundManager = SoundManager.shared
     private let haptics = HapticManager.shared
@@ -134,6 +135,11 @@ class GameViewModel: ObservableObject {
         
         // Start hint timer
         startHintTimer()
+        
+        // Track level start and user properties
+        analytics.logLevelStart(levelNumber: initialPuzzle.levelNumber)
+        analytics.setUserLevel(loadedProgress.currentLevel)
+        analytics.setUserCoins(loadedProgress.coins)
     }
     
     deinit {
@@ -252,6 +258,9 @@ class GameViewModel: ObservableObject {
                 showConfetti = true
             }
             
+            // Track word found
+            analytics.logWordFound(word: word, wordLength: word.count, isBonus: false)
+            
             // Reset hint timer on activity
             resetHintTimer()
             
@@ -279,6 +288,9 @@ class GameViewModel: ObservableObject {
             }
             
             showMessage("Bonus!", type: .success)
+            
+            // Track bonus word found
+            analytics.logWordFound(word: word, wordLength: word.count, isBonus: true)
             
             // Reset hint timer on activity
             resetHintTimer()
@@ -336,6 +348,7 @@ class GameViewModel: ObservableObject {
     func shuffleWheel() {
         soundManager.playShuffleSound()
         haptics.mediumTap()
+        analytics.logShuffle()
         
         // Trigger shuffle animation
         showShuffleAnimation = true
@@ -367,6 +380,15 @@ class GameViewModel: ObservableObject {
         // Play level complete sound and haptic
         soundManager.playLevelCompleteSound()
         haptics.heavyTap()
+        
+        // Track level completion
+        analytics.logLevelComplete(
+            levelNumber: gameState.puzzle.levelNumber,
+            wordsFound: gameState.foundWords.count,
+            bonusWords: bonusCount,
+            coinsEarned: totalCoinsEarned,
+            hintsUsed: hintsUsedThisLevel
+        )
         
         // Stop hint timer
         hintTimer?.invalidate()
@@ -430,6 +452,10 @@ class GameViewModel: ObservableObject {
             persistence.saveProgress(progress)
             
             showMessage("Level \(nextPuzzle.levelNumber)", type: .info)
+            
+            // Track new level start
+            analytics.logLevelStart(levelNumber: nextLevel)
+            analytics.setUserLevel(nextLevel)
         } else {
             showMessage("Failed to generate puzzle", type: .error)
         }
@@ -469,6 +495,7 @@ class GameViewModel: ObservableObject {
             soundManager.playErrorSound()
             haptics.error()
             showMessage("Hint in \(secondsUntilFreeHint)s (or \(CoinRules.hintCost) coins)", type: .error)
+            analytics.logFreeHintWait()
             return
         }
         
@@ -508,6 +535,7 @@ class GameViewModel: ObservableObject {
                     
                     // Track hint usage
                     hintsUsedThisLevel += 1
+                    analytics.logHintUsed(paidWithCoins: usingPaidHint, coinsSpent: usingPaidHint ? CoinRules.hintCost : 0)
                     
                     // Reset hint timer (user must wait another minute for next free hint)
                     resetHintTimer()

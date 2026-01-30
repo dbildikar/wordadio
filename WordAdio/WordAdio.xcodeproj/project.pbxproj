@@ -45,6 +45,9 @@
 		A2000033000000000000001 /* ConfettiView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000034000000000000001 /* ConfettiView.swift */; };
 		A2000040000000000000001 /* SettingsSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000041000000000000001 /* SettingsSheet.swift */; };
 		F0276CD92F24371E00DFDF92 /* GoogleMobileAds in Frameworks */ = {isa = PBXBuildFile; productRef = F0276CD82F24371E00DFDF92 /* GoogleMobileAds */; };
+		F0CFBF1E2F2D40BF004F78B2 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = F0CFBF1D2F2D40BF004F78B2 /* FirebaseCore */; };
+		F0CFBF202F2D4144004F78B2 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0CFBF1F2F2D4144004F78B2 /* AnalyticsManager.swift */; };
+		F0CFBF222F2D41BC004F78B2 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = F0CFBF212F2D41BC004F78B2 /* FirebaseAnalytics */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,6 +101,7 @@
 		A2000032000000000000001 /* LevelCompleteOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelCompleteOverlay.swift; sourceTree = "<group>"; };
 		A2000034000000000000001 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
 		A2000041000000000000001 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
+		F0CFBF1F2F2D4144004F78B2 /* AnalyticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,7 +109,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F0CFBF1E2F2D40BF004F78B2 /* FirebaseCore in Frameworks */,
 				F0276CD92F24371E00DFDF92 /* GoogleMobileAds in Frameworks */,
+				F0CFBF222F2D41BC004F78B2 /* FirebaseAnalytics in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -124,6 +130,7 @@
 			children = (
 				A1000030000000000000001 /* WordAdio */,
 				A1000031000000000000001 /* WordAdioTests */,
+				F0CFBF1C2F2D40BF004F78B2 /* Frameworks */,
 				A1000032000000000000001 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -179,6 +186,7 @@
 		A1000034000000000000001 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F0CFBF1F2F2D4144004F78B2 /* AnalyticsManager.swift */,
 				A1000141000000000000001 /* AdManager.swift */,
 				A1000008000000000000001 /* DictionaryService.swift */,
 				A1000121000000000000001 /* DictionaryAPI.swift */,
@@ -253,6 +261,13 @@
 			path = Effects;
 			sourceTree = "<group>";
 		};
+		F0CFBF1C2F2D40BF004F78B2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -321,6 +336,7 @@
 			mainGroup = A1000029000000000000001;
 			packageReferences = (
 				F0276CD72F24371E00DFDF92 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */,
+				F0CFBF1B2F2D3F69004F78B2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = A1000032000000000000001 /* Products */;
 			projectDirPath = "";
@@ -388,6 +404,7 @@
 				A2000033000000000000001 /* ConfettiView.swift in Sources */,
 				A2000040000000000000001 /* SettingsSheet.swift in Sources */,
 				A1000017000000000000001 /* PersistenceManager.swift in Sources */,
+				F0CFBF202F2D4144004F78B2 /* AnalyticsManager.swift in Sources */,
 				A1000070000000000000001 /* SoundManager.swift in Sources */,
 				A1000140000000000000001 /* AdManager.swift in Sources */,
 			);
@@ -670,6 +687,14 @@
 				minimumVersion = 12.14.0;
 			};
 		};
+		F0CFBF1B2F2D3F69004F78B2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.8.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -677,6 +702,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F0276CD72F24371E00DFDF92 /* XCRemoteSwiftPackageReference "swift-package-manager-google-mobile-ads" */;
 			productName = GoogleMobileAds;
+		};
+		F0CFBF1D2F2D40BF004F78B2 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F0CFBF1B2F2D3F69004F78B2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		F0CFBF212F2D41BC004F78B2 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = F0CFBF1B2F2D3F69004F78B2 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
