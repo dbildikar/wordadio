@@ -152,21 +152,43 @@ struct LevelCompleteView: View {
     }
     
     private var continueButton: some View {
-        Button(action: onContinue) {
-            HStack {
-                Text("Continue")
-                    .font(.headline)
-                Image(systemName: "arrow.right")
+        VStack(spacing: 12) {
+            // Continue button (primary)
+            Button(action: onContinue) {
+                HStack(spacing: 8) {
+                    Text("Continue")
+                    Image(systemName: "arrow.right")
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .frame(minWidth: 180)
+                .padding(.vertical, 16)
+                .background(AppColors.primaryGradient)
+                .clipShape(Capsule())
+                .shadow(color: .purple.opacity(0.4), radius: 10, y: 5)
             }
-            .foregroundColor(.white)
-            .padding(.horizontal, 40)
-            .padding(.vertical, 16)
-            .background(AppColors.primaryGradient)
-            .clipShape(Capsule())
-            .shadow(color: .purple.opacity(0.4), radius: 10, y: 5)
+            
+            // Share button (secondary)
+            Button(action: shareScore) {
+                HStack(spacing: 6) {
+                    Image(systemName: "square.and.arrow.up")
+                    Text("Share Score")
+                }
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.8))
+            }
         }
         .scaleEffect(showButton ? 1 : 0.8)
         .opacity(showButton ? 1 : 0)
+    }
+    
+    private func shareScore() {
+        ShareManager.shared.shareLevelComplete(
+            level: stats.levelNumber,
+            wordsFound: stats.wordsFound,
+            bonusWords: stats.bonusWords,
+            stars: stats.starCount
+        )
     }
     
     // MARK: - Animation

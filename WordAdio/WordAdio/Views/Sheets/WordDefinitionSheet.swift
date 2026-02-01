@@ -42,6 +42,13 @@ struct WordDefinitionSheet: View {
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: shareWord) {
+                        Image(systemName: "square.and.arrow.up")
+                            .font(.title3)
+                            .foregroundColor(.blue)
+                    }
+                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { dismiss() }) {
                         Image(systemName: "xmark.circle.fill")
@@ -139,6 +146,10 @@ struct WordDefinitionSheet: View {
                 .foregroundColor(.secondary)
             Spacer(minLength: 60)
         }
+    }
+    
+    private func shareWord() {
+        ShareManager.shared.shareWord(word, isBonus: false)
     }
 }
 

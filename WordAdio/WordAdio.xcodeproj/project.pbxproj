@@ -48,6 +48,8 @@
 		F0CFBF1E2F2D40BF004F78B2 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = F0CFBF1D2F2D40BF004F78B2 /* FirebaseCore */; };
 		F0CFBF202F2D4144004F78B2 /* AnalyticsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0CFBF1F2F2D4144004F78B2 /* AnalyticsManager.swift */; };
 		F0CFBF222F2D41BC004F78B2 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = F0CFBF212F2D41BC004F78B2 /* FirebaseAnalytics */; };
+		F0CFBF242F2FC4D4004F78B2 /* ShareManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0CFBF232F2FC4D4004F78B2 /* ShareManager.swift */; };
+		F0CFBF262F2FC543004F78B2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F0CFBF252F2FC543004F78B2 /* GoogleService-Info.plist */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -102,6 +104,8 @@
 		A2000034000000000000001 /* ConfettiView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfettiView.swift; sourceTree = "<group>"; };
 		A2000041000000000000001 /* SettingsSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsSheet.swift; sourceTree = "<group>"; };
 		F0CFBF1F2F2D4144004F78B2 /* AnalyticsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsManager.swift; sourceTree = "<group>"; };
+		F0CFBF232F2FC4D4004F78B2 /* ShareManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareManager.swift; sourceTree = "<group>"; };
+		F0CFBF252F2FC543004F78B2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +142,7 @@
 		A1000030000000000000001 /* WordAdio */ = {
 			isa = PBXGroup;
 			children = (
+				F0CFBF252F2FC543004F78B2 /* GoogleService-Info.plist */,
 				A1000002000000000000001 /* WordAdioApp.swift */,
 				A2000002000000000000001 /* DesignSystem.swift */,
 				A1000033000000000000001 /* Models */,
@@ -186,6 +191,7 @@
 		A1000034000000000000001 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				F0CFBF232F2FC4D4004F78B2 /* ShareManager.swift */,
 				F0CFBF1F2F2D4144004F78B2 /* AnalyticsManager.swift */,
 				A1000141000000000000001 /* AdManager.swift */,
 				A1000008000000000000001 /* DictionaryService.swift */,
@@ -359,6 +365,7 @@
 				A1000021000000000000001 /* Assets.xcassets in Resources */,
 				A1000090000000000000001 /* LaunchScreen.storyboard in Resources */,
 				A1000100000000000000001 /* background-music.mp3 in Resources */,
+				F0CFBF262F2FC543004F78B2 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -403,6 +410,7 @@
 				A2000031000000000000001 /* LevelCompleteOverlay.swift in Sources */,
 				A2000033000000000000001 /* ConfettiView.swift in Sources */,
 				A2000040000000000000001 /* SettingsSheet.swift in Sources */,
+				F0CFBF242F2FC4D4004F78B2 /* ShareManager.swift in Sources */,
 				A1000017000000000000001 /* PersistenceManager.swift in Sources */,
 				F0CFBF202F2D4144004F78B2 /* AnalyticsManager.swift in Sources */,
 				A1000070000000000000001 /* SoundManager.swift in Sources */,

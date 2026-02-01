@@ -101,6 +101,17 @@ class AnalyticsManager {
         ])
     }
     
+    // MARK: - Social Events
+    
+    /// Track when user shares content
+    func logShare(type: String, level: Int?) {
+        var params: [String: Any] = ["share_type": type]
+        if let level = level {
+            params["level"] = level
+        }
+        Analytics.logEvent(AnalyticsEventShare, parameters: params)
+    }
+    
     // MARK: - User Properties
     
     /// Set user's current level as a user property
