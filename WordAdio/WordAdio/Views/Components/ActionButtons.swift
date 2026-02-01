@@ -1,9 +1,10 @@
 import SwiftUI
 
-/// Vertical stack of action buttons (shuffle, bonus, hint)
+/// Vertical stack of action buttons (shuffle, bonus, hint, achievements)
 struct ActionButtons: View {
     @ObservedObject var viewModel: GameViewModel
     let onShowBonusWords: () -> Void
+    let onShowAchievements: () -> Void
     
     private var buttonSize: CGFloat {
         LayoutMetrics.actionButtonSize
@@ -47,6 +48,21 @@ struct ActionButtons: View {
                 viewModel: viewModel,
                 size: buttonSize
             )
+            
+            // Achievements button
+            ActionButton(
+                icon: "trophy.fill",
+                iconColor: .yellow,
+                gradient: LinearGradient(
+                    colors: [.indigo, .purple],
+                    startPoint: .top,
+                    endPoint: .bottom
+                ),
+                shadowColor: .indigo.opacity(0.3),
+                size: buttonSize
+            ) {
+                onShowAchievements()
+            }
         }
     }
 }
@@ -155,7 +171,8 @@ struct ActionButton: View {
 #Preview {
     ActionButtons(
         viewModel: GameViewModel(),
-        onShowBonusWords: {}
+        onShowBonusWords: {},
+        onShowAchievements: {}
     )
     .padding()
     .background(Color.gray.opacity(0.2))

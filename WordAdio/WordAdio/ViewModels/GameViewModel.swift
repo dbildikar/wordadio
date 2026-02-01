@@ -60,6 +60,11 @@ class GameViewModel: ObservableObject {
         
         /// Calculate star rating: 1 base + 1 for bonus words + 1 for no hints
         var starCount: Int {
+            Self.calculateStars(hintsUsed: hintsUsed, bonusWords: bonusWords)
+        }
+        
+        /// Static method to calculate stars (used before stats object is created)
+        static func calculateStars(hintsUsed: Int, bonusWords: Int) -> Int {
             var stars = 1 // Base star for completing
             if bonusWords > 0 { stars += 1 }
             if hintsUsed == 0 { stars += 1 }
@@ -389,6 +394,21 @@ class GameViewModel: ObservableObject {
             coinsEarned: totalCoinsEarned,
             hintsUsed: hintsUsedThisLevel
         )
+        
+        // Calculate stars for achievements
+        let earnedStars = LevelCompleteStats.calculateStars(hintsUsed: hintsUsedThisLevel, bonusWords: bonusCount)
+        
+        // Record achievements
+        AchievementManager.shared.recordLevelComplete(
+            wordsFound: gameState.foundWords.count,
+            bonusWords: bonusCount,
+            stars: earnedStars,
+            coinsEarned: totalCoinsEarned
+        )
+        
+        // Submit to Game Center
+        GameCenterManager.shared.submitLevelScore(gameState.puzzle.levelNumber)
+        GameCenterManager.shared.submitWordsScore(AchievementManager.shared.stats.totalWordsFound)
         
         // Stop hint timer
         hintTimer?.invalidate()

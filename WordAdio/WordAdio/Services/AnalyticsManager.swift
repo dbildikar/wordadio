@@ -112,6 +112,20 @@ class AnalyticsManager {
         Analytics.logEvent(AnalyticsEventShare, parameters: params)
     }
     
+    /// Track achievement unlocked
+    func logAchievementUnlocked(achievementId: String) {
+        Analytics.logEvent(AnalyticsEventUnlockAchievement, parameters: [
+            AnalyticsParameterAchievementID: achievementId
+        ])
+    }
+    
+    /// Track leaderboard score submission
+    func logLeaderboardSubmit(score: Int) {
+        Analytics.logEvent("leaderboard_submit", parameters: [
+            "score": score
+        ])
+    }
+    
     // MARK: - User Properties
     
     /// Set user's current level as a user property
